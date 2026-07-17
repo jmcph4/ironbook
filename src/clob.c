@@ -23,7 +23,8 @@ ssize_t level_pos(const struct level* level, oid_t order_id) {
 ssize_t level_remove_at(struct level* level, size_t pos) {
     if (level == NULL || pos >= level->num_orders) return -1;
     for (size_t i=pos;i<level->num_orders-1;i++) level->orders[i] = level->orders[i+1];
-    return (ssize_t)(level->num_orders--);
+    level->num_orders--;
+    return (ssize_t)(level->num_orders);
 }
 
 ssize_t level_remove_by_oid(struct level* level, oid_t order_id) {
@@ -235,8 +236,14 @@ void book_insert(struct book* book, struct order order) {
 
 void book_remove(struct book* book, oid_t order_id) {
     if (book == NULL) return;
-    for (size_t i=0;i<book->num_bid_levels;i++) level_remove_by_oid(book->bids[i], order_id);
-    for (size_t i=0;i<book->num_ask_levels;i++) level_remove_by_oid(book->asks[i], order_id);
+    for (size_t i=0;i<book->num_bid_levels;i++) {
+        ssize_t new_num_orders = level_remove_by_oid(book->bids[i], order_id);
+        if (new_num_orders == 0) book_delete_level(book, BID, i);
+    }
+    for (size_t i=0;i<book->num_ask_levels;i++) {
+        ssize_t new_num_orders = level_remove_by_oid(book->asks[i], order_id);
+        if (new_num_orders == 0) book_delete_level(book, ASK, i);
+    }
 }
 
 struct book* book_init() {
