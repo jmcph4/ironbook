@@ -1,8 +1,8 @@
 #ifndef CLOB_H_
 #define CLOB_H_
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 typedef uint64_t oid_t;
@@ -50,4 +50,3 @@ void book_submit(struct book*, struct order);
 void book_cancel(struct book*, oid_t);
 
 #endif /* CLOB_H_ */
-

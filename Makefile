@@ -5,6 +5,9 @@ SRC_DIR := src
 BUILD_DIR := build
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)
+HDRS := $(wildcard $(SRC_DIR)/*.h)
+
+CLANG_FORMAT ?= clang-format
 
 # Build configuration (debug by default). Selected via the debug/release targets.
 CONFIG ?= debug
@@ -23,7 +26,7 @@ OUT := $(BUILD_DIR)/$(CONFIG)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(OUT)/%.o,$(SRCS))
 TARGET := $(OUT)/ironbook
 
-.PHONY: debug release build clean
+.PHONY: debug release build fmt fmt-check clean
 
 debug:
 	$(MAKE) build CONFIG=debug
@@ -39,6 +42,12 @@ $(TARGET): $(OBJS)
 $(OUT)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+fmt:
+	$(CLANG_FORMAT) -i $(SRCS) $(HDRS)
+
+fmt-check:
+	$(CLANG_FORMAT) --dry-run --Werror $(SRCS) $(HDRS)
 
 clean:
 	rm -rf $(BUILD_DIR)/
