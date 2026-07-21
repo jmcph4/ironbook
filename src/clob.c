@@ -5,13 +5,13 @@
 
 #include "clob.h"
 
-void level_free(struct level* level) {
+static void level_free(struct level* level) {
     if (level == NULL) return;
     if (level->orders != NULL) free(level->orders);
     free(level);
 }
 
-ssize_t level_insert(struct level* level, struct order order) {
+static ssize_t level_insert(struct level* level, struct order order) {
     if (level == NULL || level->price != order.price) return -1;
     struct order* new_orders =
         realloc(level->orders, (level->num_orders + 1) * sizeof(struct order));
@@ -22,14 +22,14 @@ ssize_t level_insert(struct level* level, struct order order) {
     return level->num_orders;
 }
 
-ssize_t level_pos(const struct level* level, oid_t order_id) {
+static ssize_t level_pos(const struct level* level, oid_t order_id) {
     if (level == NULL || level->num_orders == 0) return -1;
     for (size_t i = 0; i < level->num_orders; i++)
         if (level->orders[i].id == order_id) return i;
     return -1;
 }
 
-ssize_t level_remove_at(struct level* level, size_t pos) {
+static ssize_t level_remove_at(struct level* level, size_t pos) {
     if (level == NULL || pos >= level->num_orders) return -1;
     for (size_t i = pos; i < level->num_orders - 1; i++)
         level->orders[i] = level->orders[i + 1];
@@ -37,22 +37,23 @@ ssize_t level_remove_at(struct level* level, size_t pos) {
     return (ssize_t)(level->num_orders);
 }
 
-ssize_t level_remove_by_oid(struct level* level, oid_t order_id) {
+static ssize_t level_remove_by_oid(struct level* level, oid_t order_id) {
     if (level == NULL) return -1;
     ssize_t pos = level_pos(level, order_id);
     if (pos == -1) return -1;
     return level_remove_at(level, (size_t)pos);
 }
 
-struct level* book_find_level_by_price(struct level** levels, size_t num_levels,
-                                       uint64_t price) {
+static struct level* book_find_level_by_price(struct level** levels,
+                                              size_t num_levels,
+                                              uint64_t price) {
     if (levels == NULL || num_levels == 0) return NULL;
     for (size_t i = 0; i < num_levels; i++)
         if (levels[i]->price == price) return levels[i];
     return NULL;
 }
 
-void book_delete_level(struct book* book, enum side side, size_t loff) {
+static void book_delete_level(struct book* book, enum side side, size_t loff) {
     if (book == NULL) return;
     switch (side) {
     case BID: {
@@ -198,8 +199,8 @@ void book_cancel(struct book* book, oid_t order_id) {
     book_remove(book, order_id);
 }
 
-ssize_t book_new_level_offset(struct book* book, uint64_t price,
-                              enum side side) {
+static ssize_t book_new_level_offset(struct book* book, uint64_t price,
+                                     enum side side) {
     if (book == NULL) return -1;
     switch (side) {
     case BID: {
@@ -315,7 +316,7 @@ void book_free(struct book* book) {
     free(book);
 }
 
-void book_print_levels(struct level** levels, size_t num_levels) {
+static void book_print_levels(struct level** levels, size_t num_levels) {
     if (levels == NULL || num_levels == 0) return;
     for (size_t i = 0; i < num_levels; i++) {
         struct level* curr_level = levels[i];
