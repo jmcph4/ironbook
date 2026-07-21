@@ -74,7 +74,7 @@ void book_delete_level(struct book* book, enum side side, size_t loff) {
 }
 
 void book_submit(struct book* book, struct order order) {
-    if (book == NULL) return;
+    if (book == NULL || order.quantity == 0) return;
 
     uint64_t remaining_quantity = order.quantity;
 
