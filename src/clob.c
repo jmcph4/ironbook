@@ -1,8 +1,15 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
 #include "clob.h"
+
+void level_free(struct level* level) {
+    if (level == NULL) return;
+    if (level->orders != NULL) free(level->orders);
+    free(level);
+}
 
 ssize_t level_insert(struct level* level, struct order order) {
     if (level == NULL || level->price != order.price) return -1;
@@ -269,13 +276,19 @@ void book_insert(struct book* book, struct order order) {
 
 void book_remove(struct book* book, oid_t order_id) {
     if (book == NULL) return;
-    for (size_t i = 0; i < book->num_bid_levels; i++) {
+    for (size_t i = 0; i < book->num_bid_levels;) {
         ssize_t new_num_orders = level_remove_by_oid(book->bids[i], order_id);
-        if (new_num_orders == 0) book_delete_level(book, BID, i);
+        if (new_num_orders == 0)
+            book_delete_level(book, BID, i);
+        else
+            i++;
     }
-    for (size_t i = 0; i < book->num_ask_levels; i++) {
+    for (size_t i = 0; i < book->num_ask_levels;) {
         ssize_t new_num_orders = level_remove_by_oid(book->asks[i], order_id);
-        if (new_num_orders == 0) book_delete_level(book, ASK, i);
+        if (new_num_orders == 0)
+            book_delete_level(book, ASK, i);
+        else
+            i++;
     }
 }
 
@@ -306,9 +319,9 @@ void book_print_levels(struct level** levels, size_t num_levels) {
     if (levels == NULL || num_levels == 0) return;
     for (size_t i = 0; i < num_levels; i++) {
         struct level* curr_level = levels[i];
-        printf("%ld: ", curr_level->price);
+        printf("%" PRIu64 ": ", curr_level->price);
         for (size_t j = 0; j < curr_level->num_orders; j++)
-            printf("%ld ", curr_level->orders[j].quantity);
+            printf("%" PRIu64 " ", curr_level->orders[j].quantity);
         printf("\n");
     }
 }
@@ -317,10 +330,4 @@ void book_print(struct book* book) {
     if (book == NULL) return;
     book_print_levels(book->asks, book->num_ask_levels);
     book_print_levels(book->bids, book->num_bid_levels);
-}
-
-void level_free(struct level* level) {
-    if (level == NULL) return;
-    if (level->orders != NULL) free(level->orders);
-    free(level);
 }

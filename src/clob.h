@@ -25,12 +25,6 @@ struct level {
     struct order* orders;
 };
 
-void level_free(struct level*);
-
-ssize_t level_insert(struct level* level, struct order);
-ssize_t level_remove(struct level* level, oid_t);
-struct order* level_find(const struct level*, oid_t);
-
 struct book {
     size_t num_bid_levels;
     struct level** bids;
