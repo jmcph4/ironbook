@@ -1,5 +1,5 @@
 CC := gcc
-WARNINGS := -Wall -Wextra -Wpedantic -Wformat=2 -Wformat-signedness -Wconversion -Wsign-conversion -std=gnu11
+WARNINGS := -Wall -Wextra -Wpedantic -Wformat=2 -Wformat-signedness -std=gnu11
 
 SRC_DIR := src
 BUILD_DIR := build
